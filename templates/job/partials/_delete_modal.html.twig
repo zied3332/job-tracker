@@ -1,0 +1,42 @@
+	<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header bg-danger text-white">
+					<h5 class="modal-title">Confirm Deletion</h5>
+					<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					Are you sure you want to delete job:
+					<strong id="jobNameToDelete">this job</strong>?
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+					<button id="confirmDeleteBtn" type="button" class="btn btn-danger">Yes</button>
+				</div>
+			</div>
+		</div>
+	</div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+	let deleteFormToSubmit = null;
+
+	document.querySelectorAll('.btn-delete').forEach(button => {
+		button.addEventListener('click', function () {
+			const row = this.closest('tr');
+			const jobName = this.getAttribute('data-job-name');
+			deleteFormToSubmit = row.querySelector('.delete-form');
+
+			document.getElementById('jobNameToDelete').textContent = jobName;
+
+			const modal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+			modal.show();
+		});
+	});
+
+	document.getElementById('confirmDeleteBtn')?.addEventListener('click', () => {
+		if (deleteFormToSubmit) {
+			deleteFormToSubmit.submit();
+		}
+	});
+});
+</script>

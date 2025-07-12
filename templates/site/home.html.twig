@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Home{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <h1>Welcome to the Homepage</h1>
+  <li class="nav-item">
+                            <a class="nav-link" href="{{ path('job_new') }}">Add Job</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('job_dashboard') }}">Dashboard</a>
+                        </li>
+</div>
+{% endblock %}

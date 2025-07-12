@@ -1,0 +1,39 @@
+{% for job in jobs %}
+    <tr class="job-row">
+        <td class="jobNumber">
+            <a href="{{ path('job_view', { id: job.id }) }}">{{ job.jobNumber }}</a>
+        </td>
+        <td>{{ job.id }}</td>
+        <td>{{ job.claimNumber }}</td>
+        <td>{{ job.address }}</td>
+        <td>{{ job.city }}</td>
+        <td>{{ job.state }}</td>
+        <td class="status">{{ job.status|lower|trim }}</td>
+        <td class="category">{{ job.category }}</td>
+        <td class="projectManager">{{ job.projectManager }}</td>
+        <td class="company">{{ job.company ? job.company.name : 'N/A' }}</td>
+        <td>{{ job.name }}</td>
+        <td>{{ job.customer }}</td>
+        <td>{{ job.description ? job.description|u.truncate(50, '...') : '' }}</td>
+        <td>{{ job.createdAt ? job.createdAt|date('Y-m-d H:i') : '' }}</td>
+        <td>
+            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editModal{{ job.id }}">
+                Edit
+            </button>
+        </td>
+        <td>
+            <button type="button" class="btn btn-sm btn-outline-danger btn-delete" data-job-id="{{ job.id }}" data-job-name="{{ job.jobNumber }}">
+                Delete
+            </button>
+            <form method="post" action="{{ path('job_delete', { id: job.id }) }}" class="delete-form d-none">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ job.id) }}">
+            </form>
+        </td>
+    </tr>
+
+    {% include 'job/partials/_edit_modal.html.twig' with { job: job, companies: companies } %}
+{% else %}
+    <tr>
+        <td colspan="16" class="text-center">No jobs found.</td>
+    </tr>
+{% endfor %}

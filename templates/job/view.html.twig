@@ -1,0 +1,107 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<div class="container my-5">
+    <div class="mb-3 d-flex justify-content-between align-items-center">
+        <a href="{{ path('job_dashboard') }}" class="btn btn-outline-secondary">&larr; Back to Dashboard</a>
+
+        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editModal">
+            Edit
+        </button>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-dark text-white">
+            <h3 class="mb-0">Job #{{ job.jobNumber }}</h3>
+        </div>
+        <div class="card-body">
+            <div class="row mb-2">
+                <div class="col-md-6"><strong>Address:</strong> {{ job.address }}</div>
+                <div class="col-md-6"><strong>City:</strong> {{ job.city }}</div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-md-6"><strong>State:</strong> {{ job.state }}</div>
+                <div class="col-md-6"><strong>Status:</strong> {{ job.status }}</div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-md-6"><strong>Category:</strong> {{ job.category }}</div>
+                <div class="col-md-6"><strong>Manager:</strong> {{ job.projectManager }}</div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-md-6"><strong>Company:</strong> {{ job.company ? job.company.name : 'N/A' }}</div>
+                <div class="col-md-6"><strong>Customer:</strong> {{ job.customer }}</div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-md-6"><strong>Name:</strong> {{ job.name }}</div>
+                <div class="col-md-6"><strong>Description:</strong> {{ job.description ?: 'N/A' }}</div>
+            </div>
+            <div class="row">
+                <div class="col-md-6"><strong>Created At:</strong> {{ job.createdAt ? job.createdAt|date('Y-m-d H:i') : 'N/A' }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ✏️ Edit Modal -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Job #{{ job.jobNumber }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+<form method="post" action="/jobs/edit/{{ job.id }}">
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Claim Number</label>
+                                <input type="text" name="claimNumber" class="form-control" value="{{ job.claimNumber }}" maxlength="30" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Address</label>
+                                <input type="text" name="address" class="form-control" value="{{ job.address }}" maxlength="255" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">City</label>
+                                <input type="text" name="city" class="form-control" value="{{ job.city }}" maxlength="50" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">State</label>
+                                <input type="text" name="state" class="form-control" value="{{ job.state }}" maxlength="50" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Status</label>
+                                <input type="text" name="status" class="form-control" value="{{ job.status }}" maxlength="30" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Category</label>
+                                <input type="text" name="category" class="form-control" value="{{ job.category }}" maxlength="255" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Project Manager</label>
+                                <input type="text" name="projectManager" class="form-control" value="{{ job.projectManager }}" maxlength="50" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Customer</label>
+                                <input type="text" name="customer" class="form-control" value="{{ job.customer }}" maxlength="255" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Name</label>
+                                <input type="text" name="name" class="form-control" value="{{ job.name }}" maxlength="255" required>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label">Description</label>
+                                <textarea name="description" class="form-control" rows="3" maxlength="500">{{ job.description }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <input type="hidden" name="_token" value="{{ csrf_token('edit' ~ job.id) }}">
+                        <button type="submit" class="btn btn-success">Save changes</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

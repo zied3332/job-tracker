@@ -1,0 +1,116 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .form-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 30px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-error {
+            color: #e74c3c;
+            font-size: 0.875rem;
+        }
+
+        label {
+            font-weight: 600;
+        }
+
+        .btn-submit {
+            display: block;
+            width: 150px;
+            margin: 30px auto 0;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="form-container">
+    <h1>Create New Job</h1>
+
+    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+    <div class="row">
+        <div class="col-md-6 form-group">
+            {{ form_label(form.claimNumber) }}
+            {{ form_widget(form.claimNumber, {'attr': {'class': 'form-control'}}) }}
+            <div class="form-error">{{ form_errors(form.claimNumber) }}</div>
+        </div>
+        <div class="col-md-6 form-group">
+            {{ form_label(form.projectManager) }}
+            {{ form_widget(form.projectManager, {'attr': {'class': 'form-control'}}) }}
+            <div class="form-error">{{ form_errors(form.projectManager) }}</div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 form-group">
+            {{ form_label(form.address) }}
+            {{ form_widget(form.address, {'attr': {'class': 'form-control'}}) }}
+            <div class="form-error">{{ form_errors(form.address) }}</div>
+        </div>
+        <div class="col-md-3 form-group">
+            {{ form_label(form.city) }}
+            {{ form_widget(form.city, {'attr': {'class': 'form-control'}}) }}
+            <div class="form-error">{{ form_errors(form.city) }}</div>
+        </div>
+        <div class="col-md-3 form-group">
+            {{ form_label(form.state) }}
+            {{ form_widget(form.state, {'attr': {'class': 'form-control'}}) }}
+            <div class="form-error">{{ form_errors(form.state) }}</div>
+        </div>
+    </div>
+
+    <div class="row">
+       
+        <div class="col-md-4 form-group">
+            {{ form_label(form.category) }}
+            {{ form_widget(form.category, {'attr': {'class': 'form-control'}}) }}
+            <div class="form-error">{{ form_errors(form.category) }}</div>
+        </div>
+        <div class="col-md-4 form-group">
+            {{ form_label(form.company) }}
+            {{ form_widget(form.company, {'attr': {'class': 'form-control'}}) }}
+            <div class="form-error">{{ form_errors(form.company) }}</div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 form-group">
+            {{ form_label(form.name) }}
+            {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
+            <div class="form-error">{{ form_errors(form.name) }}</div>
+        </div>
+        <div class="col-md-6 form-group">
+            {{ form_label(form.customer) }}
+            {{ form_widget(form.customer, {'attr': {'class': 'form-control'}}) }}
+            <div class="form-error">{{ form_errors(form.customer) }}</div>
+        </div>
+    </div>
+
+    <!-- ✅ Job Description -->
+    <div class="form-group">
+        {{ form_label(form.description) }}
+        {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 4}}) }}
+        <div class="form-error">{{ form_errors(form.description) }}</div>
+    </div>
+
+    <button class="btn btn-success btn-submit">Create</button>
+
+    {{ form_end(form) }}
+</div>
+{% endblock %}

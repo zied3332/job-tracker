@@ -1,0 +1,228 @@
+{% extends 'base_auth.html.twig' %}
+
+{% block title %}Register{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .form-error {
+        color: #dc3545;
+        font-size: 0.875em;
+        margin-top: 4px;
+    }
+
+    .strength-bar {
+        height: 5px;
+        background-color: #e9ecef;
+        border-radius: 3px;
+        margin-top: 5px;
+        overflow: hidden;
+    }
+
+    .strength-fill {
+        height: 100%;
+        width: 0%;
+        transition: width 0.3s ease;
+    }
+
+    .toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        background: #dc3545;
+        color: white;
+        padding: 12px 18px;
+        border-radius: 5px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .toast.show {
+        opacity: 1;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="card shadow-sm p-4 rounded" style="width: 100%; max-width: 460px;">
+    <h2 class="text-center mb-4 fw-bold">Create an Account</h2>
+
+    {% for flash_error in app.flashes('verify_email_error') %}
+        <div class="alert alert-danger" role="alert">
+            {{ flash_error }}
+        </div>
+    {% endfor %}
+
+    <form id="registerForm" method="post" novalidate>
+        {{ form_row(registrationForm._token) }}
+
+        <div class="mb-3">
+            {{ form_label(registrationForm.username, null, {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(registrationForm.username, {'attr': {'id': 'emailInput'}}) }}
+            {{ form_errors(registrationForm.username) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(registrationForm.company, null, {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(registrationForm.company) }}
+            {{ form_errors(registrationForm.company) }}
+        </div>
+
+        {% set passwordField = registrationForm.plainPassword %}
+        {% set confirmField = registrationForm.confirmPassword %}
+
+        <div class="mb-3">
+            {{ form_label(passwordField, null, {'label_attr': {'class': 'form-label'}}) }}
+            <div class="input-group">
+                <input type="password"
+                       id="passwordInput"
+                       name="{{ passwordField.vars.full_name }}"
+                       class="form-control"
+                       required />
+                <button type="button" id="togglePassword" class="btn btn-outline-secondary">Show</button>
+            </div>
+            <div class="strength-bar"><div id="strengthFill" class="strength-fill bg-danger"></div></div>
+            <div id="passwordHint" class="form-text text-muted mt-1"></div>
+            {{ form_errors(passwordField) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(confirmField, null, {'label_attr': {'class': 'form-label'}}) }}
+            <input type="password"
+                   id="confirmPasswordInput"
+                   name="{{ confirmField.vars.full_name }}"
+                   class="form-control"
+                   required />
+            <div id="passwordMatch" class="form-text mt-1"></div>
+            {{ form_errors(confirmField) }}
+        </div>
+
+        <div class="d-grid">
+            <button type="submit" class="btn btn-success btn-lg">Register</button>
+        </div>
+
+        <p class="text-center mt-3 mb-0">
+            <small>Already have an account? <a href="{{ path('app_login') }}">Sign in</a></small>
+        </p>
+    </form>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const passwordInput = document.getElementById('passwordInput');
+    const confirmInput = document.getElementById('confirmPasswordInput');
+    const toggleBtn = document.getElementById('togglePassword');
+    const strengthFill = document.getElementById('strengthFill');
+    const passwordHint = document.getElementById('passwordHint');
+    const matchText = document.getElementById('passwordMatch');
+    const emailInput = document.getElementById('emailInput');
+    const toast = document.getElementById('toast');
+    const form = document.getElementById('registerForm');
+
+    // Toggle password visibility
+    if (toggleBtn && passwordInput) {
+        toggleBtn.addEventListener('click', function () {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            toggleBtn.textContent = type === 'password' ? 'Show' : 'Hide';
+        });
+    }
+
+    // Password strength & helper feedback
+    if (passwordInput) {
+        passwordInput.addEventListener('input', function () {
+            const val = passwordInput.value;
+            let width = 0;
+            let color = 'bg-danger';
+
+            // Strength bar logic
+            if (val.length >= 12 && /[A-Z]/.test(val) && /[a-z]/.test(val) && /\d/.test(val) && /[\W_]/.test(val)) {
+                width = 100;
+                color = 'bg-success';
+            } else if (val.length >= 8 && /[A-Z]/.test(val) && /\d/.test(val)) {
+                width = 70;
+                color = 'bg-primary';
+            } else if (val.length >= 6) {
+                width = 40;
+                color = 'bg-warning';
+            } else {
+                width = 20;
+                color = 'bg-danger';
+            }
+
+            strengthFill.style.width = `${width}%`;
+            strengthFill.className = `strength-fill ${color}`;
+
+            // Password hints
+            let hints = [];
+            if (val.length < 6) hints.push("Too short (min 6)");
+            if (!/[a-z]/.test(val)) hints.push("Add lowercase");
+            if (!/[A-Z]/.test(val)) hints.push("Add uppercase");
+            if (!/\d/.test(val)) hints.push("Add number");
+            if (!/[\W_]/.test(val)) hints.push("Add special char");
+
+            if (hints.length === 0) {
+                passwordHint.textContent = "✅ Strong password!";
+                passwordHint.className = "form-text text-success mt-1";
+            } else {
+                passwordHint.textContent =  hints.join(", ");
+                passwordHint.className = "form-text text-warning mt-1";
+            }
+        });
+    }
+
+    function checkMatch() {
+        if (!confirmInput.value) {
+            matchText.textContent = '';
+            return;
+        }
+
+        if (passwordInput.value === confirmInput.value) {
+            matchText.textContent = 'Passwords match';
+            matchText.className = 'form-text text-success mt-1';
+        } else {
+            matchText.textContent = 'Passwords do not match';
+            matchText.className = 'form-text text-danger mt-1';
+        }
+    }
+
+    if (passwordInput && confirmInput) {
+        passwordInput.addEventListener('input', checkMatch);
+        confirmInput.addEventListener('input', checkMatch);
+    }
+
+    if (emailInput) {
+        emailInput.addEventListener('blur', () => {
+            emailInput.value = emailInput.value.toLowerCase().trim();
+        });
+    }
+
+    function showToast(message) {
+        toast.textContent = message;
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+
+    if (form) {
+        form.addEventListener('submit', function (e) {
+            const invalid = form.querySelector(':invalid');
+            if (invalid) {
+                e.preventDefault();
+                invalid.focus();
+                showToast("Please correct the highlighted errors.");
+            } else if (passwordInput.value !== confirmInput.value) {
+                e.preventDefault();
+                confirmInput.focus();
+                showToast("Passwords do not match.");
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

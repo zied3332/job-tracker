@@ -1,0 +1,89 @@
+{% if totalPages > 1 %}
+<style>
+    .pagination-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1rem;
+    }
+
+    .pagination-scroll {
+        display: flex;
+        overflow-x: auto;
+        scroll-behavior: smooth;
+        padding: 4px;
+        gap: 4px;
+        max-width: 30%;
+    }
+
+    .pagination-scroll::-webkit-scrollbar {
+        display: none;
+    }
+
+    .page-btn {
+        border: 1px solid #ddd;
+        background: #fff;
+        padding: 6px 10px;
+        border-radius: 6px;
+        color: #007bff;
+        text-decoration: none;
+        transition: background 0.3s ease;
+        white-space: nowrap;
+    }
+
+    .page-btn.active {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .page-btn.disabled {
+        pointer-events: none;
+        color: #999;
+        
+    }
+
+    .scroll-arrow {
+        background: none;
+        border: none;
+        font-size: 1.2rem;
+        color: #007bff;
+        cursor: pointer;
+    }
+
+    .scroll-arrow:disabled {
+        color: #ccc;
+        cursor: not-allowed;
+    }
+</style>
+
+<div class="pagination-wrapper">
+
+    <button class="scroll-arrow" onclick="scrollPagination(-100)">⟨</button>
+
+    <div class="pagination-scroll" id="paginationScroll">
+        {# Prev Button #}
+        <a class="page-btn {{ page == 1 ? 'disabled' }}" href="{{ path(app.request.attributes.get('_route'), app.request.query.all | merge({'page': page - 1})) }}">← Prev</a>
+
+        {% set pagesToShow = [] %}
+        {% for i in 1..totalPages %}
+            {% set pagesToShow = pagesToShow|merge([i]) %}
+        {% endfor %}
+
+        {% for i in pagesToShow %}
+            <a class="page-btn {{ i == page ? 'active' }}" href="{{ path(app.request.attributes.get('_route'), app.request.query.all | merge({'page': i})) }}">{{ i }}</a>
+        {% endfor %}
+
+        {# Next Button #}
+        <a class="page-btn {{ page == totalPages ? 'disabled' }}" href="{{ path(app.request.attributes.get('_route'), app.request.query.all | merge({'page': page + 1})) }}">Next →</a>
+    </div>
+
+    <button class="scroll-arrow" onclick="scrollPagination(100)">⟩</button>
+</div>
+
+<script>
+    function scrollPagination(amount) {
+        const container = document.getElementById('paginationScroll');
+        container.scrollBy({ left: amount, behavior: 'smooth' });
+    }
+</script>
+{% endif %}

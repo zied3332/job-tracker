@@ -1,0 +1,21 @@
+{% extends 'base_auth.html.twig' %}
+
+{% block title %}Verify Code{% endblock %}
+
+{% block body %}
+<div class="card shadow-sm p-4 rounded" style="max-width: 420px; margin: auto;">
+    <h2 class="text-center mb-3">Verify Reset Code</h2>
+    <p>Check your inbox and enter the 6-digit code sent to your email.</p>
+
+    <form method="post">
+        <div class="mb-3">
+            <label for="code" class="form-label">6-digit Code</label>
+            <input type="text" name="code" id="code" class="form-control" required>
+        </div>
+
+        <div class="d-grid">
+            <button type="submit" class="btn btn-primary">Verify</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

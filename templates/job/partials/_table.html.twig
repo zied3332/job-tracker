@@ -1,0 +1,163 @@
+{% for message in app.flashes('success') %}
+    <div class="alert alert-success">{{ message }}</div>
+{% endfor %}
+
+{# Filters Row #}
+<div class="row g-2 align-items-center mb-3">
+    <div class="col-md-3">
+        <select id="searchField" class="form-select">
+            <option value="jobNumber" {{ filterType == 'jobNumber' ? 'selected' }}>Job #</option>
+            <option value="city" {{ filterType == 'city' ? 'selected' }}>City</option>
+            <option value="manager" {{ filterType == 'manager' ? 'selected' }}>Manager</option>
+            <option value="status" {{ filterType == 'status' ? 'selected' }}>Status</option>
+            <option value="category" {{ filterType == 'category' ? 'selected' }}>Category</option>
+            <option value="createdAt" {{ filterType == 'createdAt' ? 'selected' }}>Created At</option>
+            <option value="company" {{ filterType == 'company' ? 'selected' }}>Company</option>
+        </select>
+    </div>
+
+    <div class="col-md-4">
+        <input type="text" id="searchInput" class="form-control" value="{{ filterValue }}" placeholder="Search...">
+    </div>
+
+    <div class="col-auto">
+        <button id="searchBtn" class="btn btn-primary">Search</button>
+    </div>
+</div>
+
+{# Company Filter #}
+<div class="row mb-4">
+    <div class="col-md-6">
+        <form method="get" class="d-flex gap-2">
+            <select name="company" class="form-select" style="max-width: 250px;">
+                <option value="">All Companies</option>
+                {% for company in companies %}
+                    <option value="{{ company.name }}" {{ company.name == selectedCompany ? 'selected' : '' }}>
+                        {{ company.name }}
+                    </option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </form>
+    </div>
+</div>
+
+{# JOBS TABLE #}
+<table class="table table-bordered table-hover table-sm">
+    <thead class="table-light text-center">
+        <tr>
+            {% set columns = {
+                'jobNumber': 'Job #',
+                'claimNumber': 'Claim #',
+                'address': 'Address',
+                'city': 'City',
+                'state': 'State',
+                'status': 'Status',
+                'category': 'Category',
+                'projectManager': 'Manager',
+                'company': 'Company',
+                'name': 'Name',
+                'customer': 'Customer',
+                'description': 'Description',
+                'createdAt': 'Created At'
+            } %}
+
+            {% for key, label in columns %}
+                <th>
+                    <a href="{{ path(app.request.attributes.get('_route'),
+                        app.request.query.all | merge({'sort': key, 'direction': sort == key and direction == 'asc' ? 'desc' : 'asc'})
+                    ) }}">
+                        {{ label }}
+                        {% if sort == key %}
+                            {{ direction == 'asc' ? '▲' : '▼' }}
+                        {% endif %}
+                    </a>
+                </th>
+            {% endfor %}
+            <th>Edit</th>
+            <th>Delete</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for job in jobs %}
+            <tr class="text-center">
+                <td><a href="{{ path('job_view', { id: job.id }) }}">{{ job.jobNumber }}</a></td>
+                <td>{{ job.claimNumber }}</td>
+                <td>{{ job.address }}</td>
+                <td>{{ job.city }}</td>
+                <td>{{ job.state }}</td>
+                <td>{{ job.status }}</td>
+                <td>{{ job.category }}</td>
+                <td>{{ job.projectManager }}</td>
+                <td>{{ job.company ? job.company.name : 'N/A' }}</td>
+                <td>{{ job.name }}</td>
+                <td>{{ job.customer }}</td>
+                <td>{{ job.description ? job.description|u.truncate(50, '...') : '' }}</td>
+                <td>{{ job.createdAt ? job.createdAt|date('Y-m-d H:i') : '' }}</td>
+                <td>
+                    <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editModal{{ job.id }}">Edit</button>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-sm btn-outline-danger btn-delete" data-job-id="{{ job.id }}" data-job-name="{{ job.jobNumber }}">Delete</button>
+                    <form method="post" action="{{ path('job_delete', { id: job.id }) }}" class="delete-form d-none">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ job.id) }}">
+                    </form>
+                </td>
+            </tr>
+
+            {% include 'job/partials/_edit_modal.html.twig' with { job: job, companies: companies } %}
+        {% else %}
+            <tr><td colspan="15" class="text-center">No jobs found.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{# PAGINATION #}
+{% if page is defined and totalPages is defined %}
+    <div class="text-center mt-4">
+        {% if page < totalPages %}
+            {% if page < 4 %}
+                <div class="pagination-bar d-flex justify-content-center align-items-center gap-2">
+                    {% if page > 1 %}
+                        <a href="{{ path(app.request.attributes.get('_route'), app.request.query.all | merge({'page': page - 1})) }}" class="btn btn-outline-secondary btn-sm">← Prev</a>
+                    {% endif %}
+                    <span>Page {{ page }} of {{ totalPages }}</span>
+                    <a href="{{ path(app.request.attributes.get('_route'), app.request.query.all | merge({'page': page + 1})) }}" class="btn btn-outline-secondary btn-sm">Next →</a>
+                </div>
+            {% else %}
+                <button id="loadMoreBtn" class="btn btn-outline-primary" data-page="{{ page + 1 }}">Load More</button>
+            {% endif %}
+        {% else %}
+            {% if page < 4 %}
+                <div class="pagination-bar d-flex justify-content-center gap-2">
+                    {% if page > 1 %}
+                        <a href="{{ path(app.request.attributes.get('_route'), app.request.query.all | merge({'page': page - 1})) }}" class="btn btn-outline-secondary btn-sm">← Prev</a>
+                    {% endif %}
+                </div>
+            {% else %}
+                <p class="text-muted">End of job list.</p>
+            {% endif %}
+        {% endif %}
+    </div>
+{% endif %}
+
+{# SEARCH SCRIPT #}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const searchBtn = document.getElementById('searchBtn');
+    const fieldSelect = document.getElementById('searchField');
+    const input = document.getElementById('searchInput');
+ 
+
+    searchBtn.addEventListener('click', () => {
+        const selectedField = fieldSelect.value;
+        const value = input.value;
+
+        const url = new URL(window.location.href);
+        url.searchParams.set('filterType', selectedField);
+        url.searchParams.set('filterValue', value);
+        url.searchParams.set('page', 1);
+        window.location.href = url.toString();
+    });
+});
+</script>
